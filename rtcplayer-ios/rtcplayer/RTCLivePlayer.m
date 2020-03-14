@@ -33,7 +33,7 @@
     RTCLiveView* renderView;
 
     
-    NSString*  streamUrl;
+    NSString*  streamURL;
 }
 
 
@@ -77,13 +77,27 @@
 - (void) play:(NSString *)streamUrl
 {
     
-    // todo
+    streamURL = streamUrl;
+    connection = [self p_createPeerConnection];
+    connection.delegate = self;
+    RTCRtpTransceiverInit* transceiverInit = [[RTCRtpTransceiverInit alloc] init];
+    transceiverInit.direction = RTCRtpTransceiverDirectionRecvOnly;
+    audioTransceiver = [connection addTransceiverOfType:RTCRtpMediaTypeAudio init:transceiverInit];
+    videoTransceiver = [connection addTransceiverOfType:RTCRtpMediaTypeVideo init:transceiverInit];
+    audioTransceiver.receiver.delegate = self;
+    videoTransceiver.receiver.delegate = self;
+    videoTrack = (RTCVideoTrack*)videoTransceiver.receiver.track;
+    audioTrack = (RTCAudioTrack*)audioTransceiver.receiver.track;
+    [videoTrack addRenderer:renderView];
+    
+    // handle sdp  
+    
 }
 
 
 - (void) stop
 {
-    // todo 
+    // todo
 }
 
 
