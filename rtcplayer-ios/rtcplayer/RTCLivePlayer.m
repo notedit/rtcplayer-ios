@@ -14,6 +14,9 @@
 #import "RTCLiveView.h"
 
 
+static NSString* PLAY_STREAM_URL = @"http://172.20.10.3:1985/rtc/v1/play/";
+
+
 @interface RTCLivePlayer () <RTCPeerConnectionDelegate,RTCRtpReceiverDelegate>
 {
     
@@ -90,7 +93,51 @@
     audioTrack = (RTCAudioTrack*)audioTransceiver.receiver.track;
     [videoTrack addRenderer:renderView];
     
-    // handle sdp  
+    __weak id weakSelf = self;
+    
+    [connection offerForConstraints:nil completionHandler:^(RTCSessionDescription * _Nullable sdp, NSError * _Nullable error) {
+        
+        if (error) {
+            NSLog(@"error %@", error);
+            return;
+        }
+        
+        [connection setLocalDescription:sdp completionHandler:^(NSError * _Nullable error) {
+            
+            NSDictionary* data = @{
+                                   @"url":@"http://locaohost:1985/rtc/v1/play/",
+                                   @"streamurl":streamURL,
+                                   @"sdp":sdp.sdp,
+                                   };
+            
+            NSLog(@"offer %@", sdp.sdp);
+            
+            [sessionManager POST:PLAY_STREAM_URL parameters:data progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                
+                NSString* answerstr = [responseObject objectForKey:@"sdp"];
+                
+                NSLog(@"play response %@", responseObject);
+                
+                RTCSessionDescription* answer = [[RTCSessionDescription alloc] initWithType:RTCSdpTypeAnswer sdp:answerstr];
+                
+                NSLog(@"answer %@", answerstr);
+                
+                [connection setRemoteDescription:answer completionHandler:^(NSError * _Nullable error) {
+                    
+                    if(error) {
+                        NSLog(@"error %@",error);
+                    }
+                }];
+                
+            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                
+                NSLog(@"http error %@", error);
+                
+            }];
+            
+            
+        }];
+    }];
     
 }
 
@@ -98,6 +145,7 @@
 - (void) stop
 {
     // todo
+    
 }
 
 
@@ -138,7 +186,6 @@
                                                                         delegate:nil];
     return peerconnection;
 }
-
 
 
 

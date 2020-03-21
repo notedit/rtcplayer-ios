@@ -14,6 +14,8 @@
 #import <UIKit/UIKit.h>
 #import <CoreGraphics/CoreGraphics.h>
 
+#import "RTCLivePlayer.h"
+
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 
-@interface RTCLiveView : NSObject
+@interface RTCLiveView : UIView
 
 @property (nonatomic, readonly) CGSize videoSize;
 @property (nonatomic, readonly) BOOL hasVideoData;
