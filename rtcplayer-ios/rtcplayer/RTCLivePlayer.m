@@ -14,14 +14,18 @@
 #import "RTCLiveView.h"
 
 
-static NSString* PLAY_STREAM_URL = @"http://172.20.10.3:1985/rtc/v1/play/";
+
+//static NSString* PLAY_STREAM_URL = @"http://10.170.155.12:1985/rtc/v1/play/";
+
+
+static NSString* PLAY_STREAM_URL = @"http://10.170.155.12:1985/rtc/v1/play/";
 
 
 @interface RTCLivePlayer () <RTCPeerConnectionDelegate,RTCRtpReceiverDelegate>
 {
     
-    RTCVideoDecoderFactoryH264* decoderFactory;
-    RTCVideoEncoderFactoryH264* encoderFactory;
+    RTCDefaultVideoDecoderFactory* decoderFactory;
+    RTCDefaultVideoEncoderFactory* encoderFactory;
     
     RTCPeerConnection* connection;
     RTCPeerConnectionFactory* factory;
@@ -139,6 +143,14 @@ static NSString* PLAY_STREAM_URL = @"http://172.20.10.3:1985/rtc/v1/play/";
         }];
     }];
     
+    
+    
+    [NSTimer scheduledTimerWithTimeInterval:5.0
+                                     target:self
+                                   selector:@selector(dumpStats)
+                                   userInfo:nil
+                                    repeats:YES];
+    
 }
 
 
@@ -146,6 +158,15 @@ static NSString* PLAY_STREAM_URL = @"http://172.20.10.3:1985/rtc/v1/play/";
 {
     // todo
     
+}
+
+
+-(void) dumpStats {
+    
+//    [connection statisticsWithCompletionHandler:^(RTCStatisticsReport * _Nonnull reports) {
+//
+//        NSLog(@"reports %@", reports);
+//    }];
 }
 
 
@@ -162,8 +183,8 @@ static NSString* PLAY_STREAM_URL = @"http://172.20.10.3:1985/rtc/v1/play/";
     
     renderView = [[RTCLiveView alloc] initWithFrame:CGRectZero];
     
-    decoderFactory = [[RTCVideoDecoderFactoryH264 alloc] init];
-    encoderFactory = [[RTCVideoEncoderFactoryH264 alloc] init];
+    decoderFactory = [[RTCDefaultVideoDecoderFactory alloc] init];
+    encoderFactory = [[RTCDefaultVideoEncoderFactory alloc] init];
     
     // factory
     factory = [[RTCPeerConnectionFactory alloc] initWithEncoderFactory:encoderFactory decoderFactory:decoderFactory];
@@ -267,6 +288,7 @@ didChangeIceGatheringState:(RTCIceGatheringState)newState
 didGenerateIceCandidate:(RTCIceCandidate *)candidate
 {
     
+    NSLog(@"candidate %@", candidate.sdp);
 }
 
 /** Called when a group of local Ice candidates have been removed. */
@@ -316,7 +338,7 @@ didStartReceivingOnTransceiver:(RTCRtpTransceiver *)transceiver
     if ([rtpReceiver.track.kind isEqualToString:@"video"]) {
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            //[renderView setVideoTrack:(RTCVideoTrack*)rtpReceiver.track];
+            [renderView setVideoTrack:(RTCVideoTrack*)rtpReceiver.track];
         });
     }
     
@@ -347,7 +369,11 @@ didChangeLocalCandidate:(RTCIceCandidate *)local
         lastReceivedMs:(int)lastDataReceivedMs
           changeReason:(NSString *)reason
 {
+    
     NSLog(@"didChangeLocalCandidate %@", reason);
+    NSLog(@"localcandidate %@", local.sdp);
+    NSLog(@"remotecandidate %@", remote.sdp);
+    
 }
 
 
