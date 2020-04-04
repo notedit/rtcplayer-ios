@@ -53,9 +53,13 @@ typedef NS_ENUM(NSInteger, RTCLivePlayerState)
 // 播放器状态
 @property (atomic, readonly) RTCLivePlayerState state;
 
+// 信令API
+@property (atomic, assign) NSString* apiURL;
 
-/// 实例化
+
+// 实例化
 - (instancetype) initWithDelegate:(id<RTCLivePlayerDelegate>)delegate;
+
 
 
 // 开始直播

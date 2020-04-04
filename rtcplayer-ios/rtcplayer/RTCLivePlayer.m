@@ -15,10 +15,10 @@
 
 
 
-//static NSString* PLAY_STREAM_URL = @"http://10.170.155.12:1985/rtc/v1/play/";
+// static NSString* PLAY_STREAM_URL = @"http://10.170.155.12:1985/rtc/v1/play/";
 
 
-static NSString* PLAY_STREAM_URL = @"http://10.170.155.12:1985/rtc/v1/play/";
+// static NSString* PLAY_STREAM_URL = @"http://10.170.155.12:1985/rtc/v1/play/";
 
 
 @interface RTCLivePlayer () <RTCPeerConnectionDelegate,RTCRtpReceiverDelegate>
@@ -84,6 +84,17 @@ static NSString* PLAY_STREAM_URL = @"http://10.170.155.12:1985/rtc/v1/play/";
 - (void) play:(NSString *)streamUrl
 {
     
+    
+    if (streamUrl.length == 0) {
+        NSLog(@"streamurl is empty");
+        return;
+    }
+    
+    if (_apiURL.length == 0) {
+        NSLog(@"apiurl is empty");
+        return;
+    }
+    
     streamURL = streamUrl;
     connection = [self p_createPeerConnection];
     connection.delegate = self;
@@ -109,14 +120,14 @@ static NSString* PLAY_STREAM_URL = @"http://10.170.155.12:1985/rtc/v1/play/";
         [connection setLocalDescription:sdp completionHandler:^(NSError * _Nullable error) {
             
             NSDictionary* data = @{
-                                   @"url":@"http://locaohost:1985/rtc/v1/play/",
+                                   @"url":self.apiURL,
                                    @"streamurl":streamURL,
                                    @"sdp":sdp.sdp,
                                    };
             
             NSLog(@"offer %@", sdp.sdp);
             
-            [sessionManager POST:PLAY_STREAM_URL parameters:data progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            [sessionManager POST:self.apiURL parameters:data progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 
                 NSString* answerstr = [responseObject objectForKey:@"sdp"];
                 
