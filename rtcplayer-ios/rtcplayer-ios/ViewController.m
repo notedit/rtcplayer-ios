@@ -50,6 +50,8 @@
     
     player = [[RTCLivePlayer alloc] initWithDelegate:self];
     
+    player.apiURL = self.apiUrlInput.text;
+    
     player.view.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.width);
     
     [self.view addSubview:player.view];
